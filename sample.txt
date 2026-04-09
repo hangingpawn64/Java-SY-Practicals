@@ -1,0 +1,3 @@
+Hello, this is a java file handling demo
+Writing new content
+Appending more data
