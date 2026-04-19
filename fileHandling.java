@@ -57,9 +57,19 @@ public class fileHandling {
             System.out.println("Error reading file");
         }
         
-        // copy file
-        try(FileInputStream fis) = new FileInputStream(){
-            FileOutputStream fos = new FileOutputStream("copy.txt")
+        // Copy file
+        try (FileInputStream fis = new FileInputStream(FileName);
+             FileOutputStream fos = new FileOutputStream("copy.txt")) {
+
+            int ch;
+            while ((ch = fis.read()) != -1) {
+                fos.write(ch);
+            }
+
+            System.out.println("File copied successfully");
+
+        } catch (IOException e) {
+            System.out.println("Error copying file");
         }
         
     }
