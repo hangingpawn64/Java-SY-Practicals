@@ -1,191 +1,175 @@
+import java.awt.*;
+import java.awt.event.*;
 import java.util.*;
 import java.io.*;
-
-// Contact Class
 class Contact {
-    String name;
-    String phone;
-    String email;
+    String name, phone, email, address;
 
-    Contact(String name, String phone, String email) {
+    Contact(String name, String phone, String email, String address) {
         this.name = name;
         this.phone = phone;
         this.email = email;
+        this.address = address;
     }
 
     String toFileString() {
-        return name + "," + phone + "," + email;
+        return name + "," + phone + "," + email + "," + address;
     }
 
-    void display() {
-        System.out.println("Name  : " + name);
-        System.out.println("Phone : " + phone);
-        System.out.println("Email : " + email);
-        System.out.println("---------------------------");
+    String display() {
+        return "Name: " + name + ", Phone: " + phone + ", Email: " + email + "Address: " + address;
     }
 }
 
-// Main Class
-public class ContactManager {
+public class ContactManager extends Frame implements ActionListener {
+
     static ArrayList<Contact> contacts = new ArrayList<>();
-    static Scanner sc = new Scanner(System.in);
     static final String FILE_NAME = "contacts.txt";
 
-    // LOAD FROM FILE
+    TextField nameField, phoneField, emailField, addressField;
+    TextArea output;
+
+    Button addBtn, viewBtn, searchBtn, deleteBtn, updateBtn;
+
+    ContactManager() {
+
+        setTitle("Contact Manager");
+        setSize(400, 400);
+        setLayout(new FlowLayout());
+
+        add(new Label("Name"));
+        nameField = new TextField(20);
+        add(nameField);
+
+        add(new Label("Phone"));
+        phoneField = new TextField(20);
+        add(phoneField);
+
+        add(new Label("Email"));
+        emailField = new TextField(20);
+        add(emailField);
+
+        add(new Label("Address"));
+        addressField = new TextField(20);
+        add(addressField);
+
+        addBtn = new Button("Add");
+        viewBtn = new Button("View");
+        searchBtn = new Button("Search");
+        deleteBtn = new Button("Delete");
+        updateBtn = new Button("Update");
+
+        add(addBtn);
+        add(viewBtn);
+        add(searchBtn);
+        add(deleteBtn);
+        add(updateBtn);
+
+        output = new TextArea(10, 40);
+        add(output);
+
+        addBtn.addActionListener(this);
+        viewBtn.addActionListener(this);
+        searchBtn.addActionListener(this);
+        deleteBtn.addActionListener(this);
+        updateBtn.addActionListener(this);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                dispose();
+            }
+        });
+
+        loadFromFile();
+        setVisible(true);
+    }
+
     static void loadFromFile() {
         try {
             File file = new File(FILE_NAME);
-
             if (!file.exists()) return;
 
             BufferedReader br = new BufferedReader(new FileReader(file));
             String line;
 
             while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
-                if (data.length == 3) {
-                    contacts.add(new Contact(data[0], data[1], data[2]));
+                String[] d = line.split(",");
+                if (d.length == 3) {
+                    contacts.add(new Contact(d[0], d[1], d[2], d[3]));
                 }
             }
             br.close();
-
-        } catch (IOException e) {
-            System.out.println("Error loading contacts.");
-        }
+        } catch (Exception e) {}
     }
 
-    // SAVE TO FILE
     static void saveToFile() {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_NAME));
-
             for (Contact c : contacts) {
                 bw.write(c.toFileString());
                 bw.newLine();
             }
-
             bw.close();
-
-        } catch (IOException e) {
-            System.out.println("Error saving contacts.");
-        }
+        } catch (Exception e) {}
     }
 
-    // ADD CONTACT
-    static void addContact() {
-        System.out.print("Enter Name: ");
-        String name = sc.nextLine();
+    public void actionPerformed(ActionEvent e) {
 
-        System.out.print("Enter Phone: ");
-        String phone = sc.nextLine();
+        String name = nameField.getText();
+        String phone = phoneField.getText();
+        String email = emailField.getText();
+        String address = addressField.getText();
 
-        System.out.print("Enter Email: ");
-        String email = sc.nextLine();
-
-        contacts.add(new Contact(name, phone, email));
-        saveToFile();
-
-        System.out.println("✅ Contact Saved!\n");
-    }
-
-    // VIEW CONTACTS
-    static void viewContacts() {
-        if (contacts.isEmpty()) {
-            System.out.println("No contacts found.\n");
-            return;
+        if (e.getSource() == addBtn) {
+            contacts.add(new Contact(name, phone, email, address));
+            saveToFile();
+            output.setText("Contact Added");
         }
 
-        for (Contact c : contacts) {
-            c.display();
-        }
-    }
-
-    // SEARCH CONTACT
-    static void searchContact() {
-        System.out.print("Enter name to search: ");
-        String name = sc.nextLine();
-
-        for (Contact c : contacts) {
-            if (c.name.equalsIgnoreCase(name)) {
-                c.display();
-                return;
+        else if (e.getSource() == viewBtn) {
+            String res = "";
+            for (Contact c : contacts) {
+                res += c.display() + "\n";
             }
+            output.setText(res);
         }
 
-        System.out.println("Contact not found.\n");
-    }
-
-    // DELETE CONTACT
-    static void deleteContact() {
-        System.out.print("Enter name to delete: ");
-        String name = sc.nextLine();
-
-        Iterator<Contact> it = contacts.iterator();
-
-        while (it.hasNext()) {
-            Contact c = it.next();
-            if (c.name.equalsIgnoreCase(name)) {
-                it.remove();
-                saveToFile();
-                System.out.println("🗑 Contact Deleted!\n");
-                return;
-            }
-        }
-
-        System.out.println("Contact not found.\n");
-    }
-
-    // UPDATE CONTACT
-    static void updateContact() {
-        System.out.print("Enter name to update: ");
-        String name = sc.nextLine();
-
-        for (Contact c : contacts) {
-            if (c.name.equalsIgnoreCase(name)) {
-                System.out.print("Enter new phone: ");
-                c.phone = sc.nextLine();
-
-                System.out.print("Enter new email: ");
-                c.email = sc.nextLine();
-
-                saveToFile();
-                System.out.println("✏ Contact Updated!\n");
-                return;
-            }
-        }
-
-        System.out.println("Contact not found.\n");
-    }
-
-    // MAIN
-    public static void main(String[] args) {
-
-        loadFromFile(); // 🔥 important
-
-        while (true) {
-            System.out.println("===== CONTACT SYSTEM =====");
-            System.out.println("1. Add Contact");
-            System.out.println("2. View Contacts");
-            System.out.println("3. Search Contact");
-            System.out.println("4. Delete Contact");
-            System.out.println("5. Update Contact");
-            System.out.println("6. Exit");
-
-            System.out.print("Choose option: ");
-            int choice = Integer.parseInt(sc.nextLine());
-
-            switch (choice) {
-                case 1: addContact(); break;
-                case 2: viewContacts(); break;
-                case 3: searchContact(); break;
-                case 4: deleteContact(); break;
-                case 5: updateContact(); break;
-                case 6:
-                    System.out.println("Exiting...");
+        else if (e.getSource() == searchBtn) {
+            for (Contact c : contacts) {
+                if (c.name.equalsIgnoreCase(name)) {
+                    output.setText(c.display());
                     return;
-                default:
-                    System.out.println("Invalid choice!\n");
+                }
             }
+            output.setText("Not Found");
         }
+
+        else if (e.getSource() == deleteBtn) {
+            Iterator<Contact> it = contacts.iterator();
+            while (it.hasNext()) {
+                if (it.next().name.equalsIgnoreCase(name)) {
+                    it.remove();
+                    saveToFile();
+                    output.setText("Deleted");
+                    return;
+                }
+            }
+            output.setText("Not Found");
+        }
+
+        else if (e.getSource() == updateBtn) {
+            for (Contact c : contacts) {
+                if (c.name.equalsIgnoreCase(name)) {
+                    c.phone = phone;
+                    c.email = email;
+                    saveToFile();
+                    output.setText("Updated");
+                    return;
+                }
+            }
+            output.setText("Not Found");
+        }
+    }
+    public static void main(String[] args) {
+        new ContactManager();
     }
 }

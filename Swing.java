@@ -49,7 +49,7 @@ public class Swing {
                             "Not Selected";
             String country = (String)comboBox.getSelectedItem();
             String selectLang = list.getSelectedValue();
-        JOptionPane.showMessageDialog(frame, "Name: "+name + "\nGender: "+ gender + 
+            JOptionPane.showMessageDialog(frame, "Name: "+name + "\nGender: "+ gender + 
                                     "\nCountry: "+country + "\nLanguage: " + selectLang +
                                     "\nAccepted: " + checkBox.isSelected());
         });
